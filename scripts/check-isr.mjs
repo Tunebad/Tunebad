@@ -26,8 +26,18 @@ try {
 }
 
 const routes = manifest.routes ?? {};
-const songRoutes = Object.keys(routes).filter((r) => r.startsWith("/song/"));
-const artistRoutes = Object.keys(routes).filter((r) => r.startsWith("/artist/"));
+const dynamicRoutes = manifest.dynamicRoutes ?? {};
+
+// Since 2026-10 the policy is stricter than "song pages never expire": EVERY
+// catalog page is frozen until the next deploy AND can only exist if it was
+// built at deploy time (lib/server/catalog.ts explains why — crawlers walking
+// on-demand pages cost 426K ISR writes against a 200K limit). So assert both
+// halves: no catalog route carries a timed window, and no catalog dynamic
+// route is allowed to generate pages on demand (fallback must be `false`,
+// which is what `dynamicParams = false` compiles to).
+const CATALOG = /^\/(song|artist|songs)(\/|$)|^\/$|^\/sitemaps\//;
+const catalogRoutes = Object.keys(routes).filter((r) => CATALOG.test(r));
+const songRoutes = catalogRoutes.filter((r) => r.startsWith("/song/"));
 
 // CI builds without Supabase env prerender zero song pages — the check is
 // then vacuous, which is fine: the real assertion runs on any full build
@@ -37,33 +47,32 @@ if (songRoutes.length === 0) {
   process.exit(0);
 }
 
-const badSongs = songRoutes.filter((r) => routes[r].initialRevalidateSeconds !== false);
-const badArtists = artistRoutes.filter(
-  (r) => routes[r].initialRevalidateSeconds !== 604_800 && routes[r].initialRevalidateSeconds !== false,
-);
-
-if (badSongs.length > 0) {
-  const sample = badSongs[0];
+const timed = catalogRoutes.filter((r) => routes[r].initialRevalidateSeconds !== false);
+if (timed.length > 0) {
+  const sample = timed[0];
   console.error(
-    `check-isr: FAIL — ${badSongs.length}/${songRoutes.length} /song/* routes have a numeric ` +
+    `check-isr: FAIL — ${timed.length}/${catalogRoutes.length} catalog routes have a numeric ` +
       `initialRevalidateSeconds (e.g. ${sample}: ${routes[sample].initialRevalidateSeconds}). ` +
-      `A fetch in the song-page render is carrying a revalidate window; it must use READ_IMMUTABLE ` +
-      `(see lib/server/link-analysis.ts) or the page regenerates per crawl and ISR writes explode.`,
+      `A fetch in that render carries a revalidate window and is clamping the page's ` +
+      `revalidate = false; catalog reads must use READ_IMMUTABLE (lib/server/link-analysis.ts).`,
   );
   process.exit(1);
 }
 
-if (badArtists.length > 0) {
-  const sample = badArtists[0];
+const onDemand = Object.entries(dynamicRoutes)
+  .filter(([route]) => CATALOG.test(route))
+  .filter(([, info]) => info.fallback !== false)
+  .map(([route]) => route);
+if (onDemand.length > 0) {
   console.error(
-    `check-isr: FAIL — ${badArtists.length}/${artistRoutes.length} /artist/* routes deviate from ` +
-      `their declared weekly window (e.g. ${sample}: ${routes[sample].initialRevalidateSeconds}). ` +
-      `A fetch in the artist-page render is clamping it; pass READ_WEEKLY (lib/server/link-analysis.ts).`,
+    `check-isr: FAIL — catalog routes still generate pages on demand: ${onDemand.join(", ")}. ` +
+      `Each must declare dynamicParams = false and build its full set in generateStaticParams, ` +
+      `or every crawler request for an unbuilt URL becomes a render plus an ISR write.`,
   );
   process.exit(1);
 }
 
 console.log(
-  `check-isr: OK — ${songRoutes.length} /song/* routes at false, ` +
-    `${artistRoutes.length} /artist/* routes at their declared window`,
+  `check-isr: OK — ${catalogRoutes.length} catalog routes frozen (${songRoutes.length} song pages), ` +
+    `no catalog route generates on demand`,
 );

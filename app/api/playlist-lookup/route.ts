@@ -1,3 +1,4 @@
+import { isPublished } from "@/lib/server/catalog";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { validateSpotifyUrl, validatePlaylistUrl } from "@/lib/media-url";
@@ -75,7 +76,12 @@ async function resolveTrack(track: SourceTrack): Promise<PlaylistLookupTrack> {
     artist: match.artist || track.artist || null,
     sourceId,
     previewUrl: match.previewUrl,
-    cached,
+    // The client links a cached track to /song/<slug>. Only published songs
+    // have that page (lib/server/catalog.ts), so blank the slug otherwise —
+    // the analysis data still shows, the row just isn't a dead link. Empty
+    // string rather than null keeps the client's `slug: string` type intact;
+    // the table already renders a plain title when the slug is falsy.
+    cached: cached ? { ...cached, slug: isPublished(cached.created_at) ? cached.slug : "" } : null,
   };
 }
 

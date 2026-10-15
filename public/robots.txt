@@ -1,47 +1,60 @@
+# TuneBad robots policy.
+#
+# The site runs on free hosting tiers, where crawler traffic -- not people --
+# is what actually uses up the quota (Oct 2026: ~99% of requests were bots
+# walking the song catalog). So crawlers are welcome in proportion to what
+# they give back. Bots that ignore this file are handled by the Vercel
+# firewall instead.
+
+# Search engines and everyone else: the whole public site.
 User-agent: *
 Allow: /
 Disallow: /api/
 
-# AI / answer-engine crawlers are explicitly welcome.
+# Answer engines that cite and link back to sources: the whole public site.
 # A machine-readable site summary lives at /llms.txt.
-User-agent: GPTBot
-Allow: /
-Disallow: /api/
-
 User-agent: OAI-SearchBot
-Allow: /
-Disallow: /api/
-
 User-agent: ChatGPT-User
-Allow: /
-Disallow: /api/
-
-User-agent: ClaudeBot
-Allow: /
-Disallow: /api/
-
-User-agent: anthropic-ai
-Allow: /
-Disallow: /api/
-
 User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: DuckAssistBot
 Allow: /
 Disallow: /api/
 
-User-agent: Google-Extended
-Allow: /
-Disallow: /api/
-
-User-agent: Applebot-Extended
-Allow: /
-Disallow: /api/
-
+# AI training crawlers: the tools and guides, so models learn what TuneBad
+# does -- but not the song catalog, which is tens of thousands of near-
+# identical data pages that cost the most to serve and teach a model nothing
+# it can attribute back here.
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
 User-agent: CCBot
-Allow: /
-Disallow: /api/
-
+User-agent: Google-Extended
+User-agent: Applebot-Extended
 User-agent: meta-externalagent
+User-agent: Amazonbot
+User-agent: Bytespider
+User-agent: cohere-ai
+User-agent: ImagesiftBot
 Allow: /
 Disallow: /api/
+Disallow: /song/
+Disallow: /artist/
+Disallow: /songs/
+
+# SEO-tool crawlers: nothing to gain, and among the heaviest crawlers there are.
+User-agent: AhrefsBot
+User-agent: AhrefsSiteAudit
+User-agent: SemrushBot
+User-agent: SiteAuditBot
+User-agent: DotBot
+User-agent: MJ12bot
+User-agent: DataForSeoBot
+User-agent: BLEXBot
+User-agent: Barkrowler
+User-agent: serpstatbot
+Disallow: /
 
 Sitemap: https://www.tunebad.com/sitemap.xml

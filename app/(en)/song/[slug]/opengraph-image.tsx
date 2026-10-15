@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { READ_IMMUTABLE, readAnalysisBySlug } from "@/lib/server/link-analysis";
+import { READ_IMMUTABLE, readAllSongs, readAnalysisBySlug, SONG_READ_CAP } from "@/lib/server/link-analysis";
 
 // Per-song share card. When a /song/<slug> link is posted to Discord, iMessage,
 // Twitter, etc., this renders a branded 1200x630 image with the track's key,
@@ -12,6 +12,18 @@ import { READ_IMMUTABLE, readAnalysisBySlug } from "@/lib/server/link-analysis";
 // lives in a private app/_og folder and is force-bundled via
 // outputFileTracingIncludes in next.config.mjs so this read works on Vercel.
 export const runtime = "nodejs";
+
+// Built at deploy time for exactly the published song pages, like the pages
+// themselves (see lib/server/catalog.ts). Left dynamic, every crawler or
+// social preview fetch of an unbuilt URL was a server-side PNG render — the
+// most CPU-expensive request the site can serve, against a 4h/month free CPU
+// budget that was already at 85%.
+export const revalidate = false;
+export const dynamicParams = false;
+export async function generateStaticParams() {
+  const songs = await readAllSongs(SONG_READ_CAP, READ_IMMUTABLE);
+  return songs.map((s) => ({ slug: s.slug }));
+}
 export const alt = "Song key, BPM, and Camelot on TuneBad";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

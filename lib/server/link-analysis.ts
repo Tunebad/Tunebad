@@ -4,7 +4,7 @@
 // catalogs, and results are cached in a Supabase table (server-only env vars;
 // the browser never talks to Supabase directly).
 import { canonicalYouTubeUrl, validateSpotifyUrl, validateMediaUrl } from "@/lib/media-url";
-import { REVALIDATE_ARTIST, REVALIDATE_DATA } from "@/lib/cache-policy";
+import { PUBLISHED_FILTER } from "@/lib/server/catalog";
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
@@ -50,13 +50,18 @@ const FETCH_TIMEOUT_MS = 6000;
  * revalidateTag("song-data") (or purge the Data Cache in Vercel) alongside
  * the deploy that refreshes the pages themselves.
  *
- * READ_WEEKLY matches the artist pages' own `revalidate = 604_800`, which the
- * old blanket daily option was also silently clamping to a day.
+ * Every catalog read now uses it. Since 2026-10 every song-listing reader is
+ * filtered to the PUBLISHED set (lib/server/catalog.ts), which is frozen
+ * between deploys by construction — so there is nothing for a timed window to
+ * refresh, and any numeric window here would silently clamp the catalog pages'
+ * `revalidate = false` back down to it (the exact mechanism behind the July
+ * ISR blowout). READ_WEEKLY / READ_DAILY survive only as aliases so a stray
+ * import can't reintroduce a window.
  */
 export type ReadCache = { cache: "force-cache"; next: { tags: string[] } } | { next: { revalidate: number } };
 export const READ_IMMUTABLE: ReadCache = { cache: "force-cache", next: { tags: ["song-data"] } };
-export const READ_WEEKLY: ReadCache = { next: { revalidate: REVALIDATE_ARTIST } };
-const READ_DAILY: ReadCache = { next: { revalidate: REVALIDATE_DATA } };
+export const READ_WEEKLY: ReadCache = READ_IMMUTABLE;
+const READ_DAILY: ReadCache = READ_IMMUTABLE;
 
 function restHeaders(): Record<string, string> {
   return {
@@ -120,7 +125,7 @@ export async function readAnalysisBySlug(slug: string, cacheAs: ReadCache = READ
   if (!isLinkAnalysisConfigured) return null;
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?slug=eq.${encodeURIComponent(slug)}&limit=1`,
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&slug=eq.${encodeURIComponent(slug)}&limit=1`,
       { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...cacheAs },
     );
     if (!res.ok) return null;
@@ -143,7 +148,7 @@ export async function readSongsByCamelot(
   try {
     const inList = codes.map((c) => `"${encodeURIComponent(c)}"`).join(",");
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?camelot=in.(${inList})&slug=neq.${encodeURIComponent(exclude)}&order=created_at.desc&limit=${limit}`,
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&camelot=in.(${inList})&slug=neq.${encodeURIComponent(exclude)}&order=created_at.desc&limit=${limit}`,
       { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...cacheAs },
     );
     if (!res.ok) return [];
@@ -158,8 +163,8 @@ export async function readSongsByKey(key: string, limit = 300, offset = 0): Prom
   if (!isLinkAnalysisConfigured) return [];
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?key=eq.${encodeURIComponent(key)}&order=created_at.desc&limit=${limit}&offset=${offset}`,
-      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), next: { revalidate: REVALIDATE_DATA } },
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&key=eq.${encodeURIComponent(key)}&order=created_at.desc&limit=${limit}&offset=${offset}`,
+      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...READ_IMMUTABLE },
     );
     if (!res.ok) return [];
     return (await res.json()) as CachedAnalysis[];
@@ -174,8 +179,8 @@ export async function readSongsByCamelotCode(code: string, limit = 300, offset =
   if (!isLinkAnalysisConfigured) return [];
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?camelot=ilike.${encodeURIComponent(code)}&order=bpm.asc,created_at.desc&limit=${limit}&offset=${offset}`,
-      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), next: { revalidate: REVALIDATE_DATA } },
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&camelot=ilike.${encodeURIComponent(code)}&order=bpm.asc,created_at.desc&limit=${limit}&offset=${offset}`,
+      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...READ_IMMUTABLE },
     );
     if (!res.ok) return [];
     return (await res.json()) as CachedAnalysis[];
@@ -189,8 +194,8 @@ export async function readSongsByBpmRange(min: number, max: number, limit = 300,
   if (!isLinkAnalysisConfigured) return [];
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?bpm=gte.${min}&bpm=lte.${max}&order=created_at.desc&limit=${limit}&offset=${offset}`,
-      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), next: { revalidate: REVALIDATE_DATA } },
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&bpm=gte.${min}&bpm=lte.${max}&order=created_at.desc&limit=${limit}&offset=${offset}`,
+      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...READ_IMMUTABLE },
     );
     if (!res.ok) return [];
     return (await res.json()) as CachedAnalysis[];
@@ -210,8 +215,8 @@ export async function readSongsByBpmRangeAll(min: number, max: number, limit = 2
   const all: CachedAnalysis[] = [];
   const fetchPage = async (offset: number): Promise<CachedAnalysis[]> => {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?select=*&bpm=gte.${min}&bpm=lte.${max}&order=created_at.desc&limit=${Math.min(PAGE, limit - offset)}&offset=${offset}`,
-      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), next: { revalidate: REVALIDATE_DATA } },
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=*&bpm=gte.${min}&bpm=lte.${max}&order=created_at.desc&limit=${Math.min(PAGE, limit - offset)}&offset=${offset}`,
+      { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...READ_IMMUTABLE },
     );
     if (!res.ok) return [];
     return (await res.json()) as CachedAnalysis[];
@@ -263,7 +268,7 @@ async function readSongRange<T>(columns: string, offset: number, limit: number, 
   const all: T[] = [];
   const fetchPage = async (pageOffset: number, pageLimit: number): Promise<T[]> => {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?select=${columns}&order=created_at.desc&limit=${pageLimit}&offset=${pageOffset}`,
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=${columns}&order=created_at.desc&limit=${pageLimit}&offset=${pageOffset}`,
       { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...cacheAs },
     );
     if (!res.ok) return [];
@@ -306,7 +311,7 @@ export async function readAllSongs(limit = 10000, cacheAs: ReadCache = READ_DAIL
   const all: CachedAnalysis[] = [];
   const fetchPage = async (offset: number): Promise<CachedAnalysis[]> => {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?select=*&order=created_at.desc&limit=${Math.min(PAGE, limit - offset)}&offset=${offset}`,
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=*&order=created_at.desc&limit=${Math.min(PAGE, limit - offset)}&offset=${offset}`,
       { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...cacheAs },
     );
     if (!res.ok) return [];
@@ -352,10 +357,10 @@ export async function countSongsByBpmRange(min: number, max: number): Promise<nu
 async function countWithFilter(filter: string): Promise<number> {
   if (!isLinkAnalysisConfigured) return 0;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/link_analysis?select=id&${filter}&limit=1`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=id&${filter}&limit=1`, {
       headers: { ...restHeaders(), Prefer: "count=exact", Range: "0-0" },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      next: { revalidate: REVALIDATE_DATA },
+      ...READ_IMMUTABLE,
     });
     if (!res.ok) return 0;
     const total = res.headers.get("content-range")?.split("/")[1];
@@ -368,10 +373,10 @@ async function countWithFilter(filter: string): Promise<number> {
 export async function countSongs(): Promise<number | null> {
   if (!isLinkAnalysisConfigured) return null;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/link_analysis?select=id&limit=1`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=id&limit=1`, {
       headers: { ...restHeaders(), Prefer: "count=exact", Range: "0-0" },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-      next: { revalidate: REVALIDATE_DATA },
+      ...READ_IMMUTABLE,
     });
     if (!res.ok) return null;
     const range = res.headers.get("content-range");
@@ -409,7 +414,7 @@ export async function readSongsByArtistNames(names: string[], cacheAs: ReadCache
   const list = names.map((n) => `"${n.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`).join(",");
   try {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/link_analysis?select=*&artist=in.(${encodeURIComponent(list)})&order=created_at.desc&limit=1000`,
+      `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=*&artist=in.(${encodeURIComponent(list)})&order=created_at.desc&limit=1000`,
       { headers: restHeaders(), signal: AbortSignal.timeout(FETCH_TIMEOUT_MS), ...cacheAs },
     );
     if (!res.ok) return [];
@@ -422,7 +427,7 @@ export async function readSongsByArtistNames(names: string[], cacheAs: ReadCache
 export async function countSongsByArtistName(name: string, cacheAs: ReadCache = READ_DAILY): Promise<number> {
   if (!isLinkAnalysisConfigured || !name.trim()) return 0;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/link_analysis?select=id&artist=eq.${encodeURIComponent(name)}&limit=1`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=id&artist=eq.${encodeURIComponent(name)}&limit=1`, {
       headers: { ...restHeaders(), Prefer: "count=exact", Range: "0-0" },
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       ...cacheAs,

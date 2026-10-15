@@ -1,3 +1,4 @@
+import { PUBLISHED_FILTER } from "@/lib/server/catalog";
 // Full-catalog song search backing GET /api/songs?q=. A new file rather than
 // an addition to lib/server/link-analysis.ts (that file's core functions stay
 // untouched per house rule) — mirrors its fetch/header/env-var pattern.
@@ -33,7 +34,7 @@ export async function searchSongs(query: string, limit = 30): Promise<SongSearch
   const pattern = encodeURIComponent(quotePostgrestValue(`*${query}*`));
   const or = `or=(title.ilike.${pattern},artist.ilike.${pattern})`;
   const url =
-    `${SUPABASE_URL}/rest/v1/link_analysis?select=slug,title,artist,key,camelot,bpm&${or}` +
+    `${SUPABASE_URL}/rest/v1/link_analysis?${PUBLISHED_FILTER}&select=slug,title,artist,key,camelot,bpm&${or}` +
     `&order=created_at.desc&limit=${limit}`;
   try {
     const res = await fetch(url, {
