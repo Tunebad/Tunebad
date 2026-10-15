@@ -24,7 +24,10 @@
 // To grow the catalog: move the cutoff later, then re-check the build time
 // (every published song is prerendered; ~2,000 pages took ~10 min of the
 // 45-min Hobby build limit) and tests/catalog.test.ts.
-export const PUBLISHED_CUTOFF = "2026-06-01T00:00:00.000Z";
+// = the 2,000 oldest songs (verified 2026-10-15: exactly 2,000 rows <= this,
+// and song #2,001 is at 20:29:29.238Z). They're the charting tracks the seeder
+// started from, which is also where the search demand is.
+export const PUBLISHED_CUTOFF = "2026-07-09T20:29:28.000Z";
 
 /** PostgREST filter fragment restricting any query to the published set. */
 export const PUBLISHED_FILTER = `created_at=lte.${encodeURIComponent(PUBLISHED_CUTOFF)}`;
