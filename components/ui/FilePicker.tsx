@@ -45,6 +45,14 @@ export function FilePicker({
       <input
         {...inputProps}
         className="sr-only"
+        // The wrapping div IS the control (role=button, focusable, Enter/Space
+        // open the picker, and its text names it). This input only exists to be
+        // clicked programmatically, so keep it out of the tab order and the
+        // accessibility tree — otherwise screen readers meet a second,
+        // unlabelled control nested inside the first (axe: `label` critical +
+        // `nested-interactive` serious).
+        tabIndex={-1}
+        aria-hidden="true"
         accept={accept}
         disabled={disabled}
         // Unlike the drop path (first file or nothing), a change event with no

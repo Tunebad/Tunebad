@@ -30,7 +30,16 @@ export function ResultsTable({
   const { t } = useI18n();
   const empty = !results.length && !analyzingNames.length && !failedNames.length && !oversizedNames.length;
   return (
-    <div className="table-wrap" aria-live="polite">
+    // Focusable named region: the table scrolls sideways on narrow screens, and
+    // a scroll container keyboard users can't focus can't be scrolled without
+    // a mouse (axe: scrollable-region-focusable).
+    <div
+      className="table-wrap"
+      aria-live="polite"
+      role="region"
+      aria-label={t("analysis.resultsHeading")}
+      tabIndex={0}
+    >
       {empty ? (
         <svg className="empty-vinyl-motif" viewBox="0 0 160 160" aria-hidden="true">
           <circle cx="80" cy="80" r="78" fill="none" stroke="currentColor" strokeWidth="1" />
