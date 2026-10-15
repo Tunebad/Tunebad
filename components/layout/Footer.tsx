@@ -5,6 +5,7 @@ import { VIEW_TO_PATH, type ViewName } from "../TunebadApp";
 import { useI18n } from "@/lib/i18n";
 import type { DictKey } from "@/lib/i18n/locales/en";
 import { useLocalizedPath } from "@/lib/i18n/LocaleBoundary";
+import { CONTACT_EMAIL } from "@/components/legal/LegalShell";
 
 // Crawlable links to every indexable tool page, labeled with the existing
 // nav.* keys (already translated in all 8 locales). /history is noindex, so
@@ -93,6 +94,10 @@ export function Footer() {
           <Link href="/copyright">{t("footer.copyrightLink")}</Link>
           {" · "}
           <Link href="/privacy">{t("footer.privacyLink")}</Link>
+          {" · "}
+          <Link href="/terms">{t("footer.termsLink")}</Link>
+          {" · "}
+          <a href={`mailto:${CONTACT_EMAIL}`}>{t("footer.contactLink")}</a>
         </p>
       </div>
     </footer>

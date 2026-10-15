@@ -310,6 +310,8 @@ const fr: Record<keyof typeof en, string> = {
   "footer.copyright": "© 2026 TuneBad",
   "footer.copyrightLink": "Avis de droit d’auteur",
   "footer.privacyLink": "Politique de confidentialité",
+  "footer.termsLink": "Conditions d'utilisation",
+  "footer.contactLink": "Contact",
   "footer.guides": "Guides",
 
   // Homepage landing / FAQ section
@@ -467,7 +469,7 @@ const fr: Record<keyof typeof en, string> = {
   "copyright.s4L2": "refuser le service à quiconque tente de manière répétée de traiter des contenus protégés par le droit d'auteur ; et",
   "copyright.s4L3": "prendre des mesures techniques pour restreindre l'accès des utilisateurs qui enfreignent les présentes conditions ou la loi applicable.",
   "copyright.s5H": "5. Réclamations relatives aux droits d'auteur et demandes de retrait",
-  "copyright.s5P1": "TuneBad respecte les droits de propriété intellectuelle des créateurs. Si vous êtes titulaire de droits d'auteur (ou un agent autorisé) et estimez que le Service est utilisé pour accéder à votre œuvre sans autorisation, vous pouvez adresser une demande de retrait à l'opérateur du site. Une demande valable doit identifier l'œuvre concernée et le contenu en cause, et inclure la preuve que vous détenez les droits correspondants. TuneBad examine les demandes valables et y répond dans les meilleurs délais, et retirera le contenu identifié ou en bloquera l'accès lorsque cela est approprié.",
+  "copyright.s5P1": "TuneBad respecte les droits de propriété intellectuelle des créateurs. Si vous êtes titulaire de droits d'auteur (ou un agent autorisé) et estimez que le Service est utilisé pour accéder à votre œuvre sans autorisation, vous pouvez adresser une demande de retrait à l'opérateur du site. Une demande valable doit identifier l'œuvre concernée et le contenu en cause, et inclure la preuve que vous détenez les droits correspondants. TuneBad examine les demandes valables et y répond dans les meilleurs délais, et retirera le contenu identifié ou en bloquera l'accès lorsque cela est approprié. Envoyez vos avis à thetunebad@gmail.com.",
   "copyright.back": "Retour à TuneBad",
 
   // File tools (More tools section)

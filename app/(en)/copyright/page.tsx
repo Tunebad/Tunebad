@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { LegalShell } from "@/components/legal/LegalShell";
 import { I18nProvider } from "@/lib/i18n";
 import { CopyrightBody } from "@/components/legal/CopyrightBody";
 
@@ -13,42 +13,13 @@ export const metadata: Metadata = {
 
 export default function CopyrightPage() {
   return (
-    <div className="app-shell">
-      <header className="legal-topbar">
-        <Link href="/" className="brand" aria-label="TuneBad, back to home">
-          <span className="brand-logo-wrap">
-            <picture>
-              <source media="(prefers-color-scheme: dark)" srcSet="/logo-dark-76.webp" />
-              <img src="/logo-light-76.webp" alt="" width={34} height={34} className="brand-logo" />
-            </picture>
-          </span>
-          <span className="brand-wordmark">TUNEBAD</span>
-        </Link>
-      </header>
-
-      <main>
-        {/* Wrapped in its own I18nProvider (this page lives outside TunebadApp).
-            SSR renders English; the provider picks up the visitor's saved
-            locale after hydration, same pattern as the homepage FAQ. */}
-        <I18nProvider>
-          <CopyrightBody />
-        </I18nProvider>
-      </main>
-
-      <footer className="site-footer">
-        <div className="site-footer-inner">
-          <div className="site-footer-brand">
-            <picture>
-              <source media="(prefers-color-scheme: dark)" srcSet="/logo-dark-76.webp" />
-              <img src="/logo-light-76.webp" alt="" width={24} height={24} className="site-footer-logo" loading="lazy" />
-            </picture>
-            <span className="site-footer-wordmark">TUNEBAD</span>
-          </div>
-          <p className="site-footer-copyright">
-            © 2026 TuneBad · <a href="/privacy">Privacy</a> · <a href="/copyright">Copyright</a>
-          </p>
-        </div>
-      </footer>
-    </div>
+    <LegalShell>
+      {/* Wrapped in its own I18nProvider (this page lives outside TunebadApp).
+          SSR renders English; the provider picks up the visitor's saved
+          locale after hydration, same pattern as the homepage FAQ. */}
+      <I18nProvider>
+        <CopyrightBody />
+      </I18nProvider>
+    </LegalShell>
   );
 }

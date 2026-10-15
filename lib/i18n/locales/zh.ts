@@ -308,6 +308,8 @@ const zh: Record<keyof typeof en, string> = {
   "footer.copyright": "© 2026 TuneBad",
   "footer.copyrightLink": "版权声明",
   "footer.privacyLink": "隐私政策",
+  "footer.termsLink": "使用条款",
+  "footer.contactLink": "联系我们",
   "footer.guides": "指南",
 
   // Homepage landing / FAQ section
@@ -465,7 +467,7 @@ const zh: Record<keyof typeof en, string> = {
   "copyright.s4L2": "拒绝向多次试图处理受版权保护内容的任何人提供服务；以及",
   "copyright.s4L3": "采取技术措施，限制违反本条款或适用法律的用户的访问。",
   "copyright.s5H": "5. 版权主张与移除请求",
-  "copyright.s5P1": "TuneBad尊重创作者的知识产权。如果您是版权所有者（或经授权的代理人），并认为本服务正被用于未经授权访问您的作品，您可以向网站运营者提交移除通知。有效的通知应指明所涉及的具体作品和相关材料，并附上您持有相应权利的证明。TuneBad会及时审查并回复有效通知，并在适当情况下移除相关材料或阻止对其的访问。",
+  "copyright.s5P1": "TuneBad尊重创作者的知识产权。如果您是版权所有者（或经授权的代理人），并认为本服务正被用于未经授权访问您的作品，您可以向网站运营者提交移除通知。有效的通知应指明所涉及的具体作品和相关材料，并附上您持有相应权利的证明。TuneBad会及时审查并回复有效通知，并在适当情况下移除相关材料或阻止对其的访问。 请将通知发送至 thetunebad@gmail.com。",
   "copyright.back": "返回TuneBad",
 
   // File tools (More tools section)

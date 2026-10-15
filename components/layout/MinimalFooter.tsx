@@ -15,7 +15,7 @@ export function MinimalFooter() {
           <span className="site-footer-wordmark">TUNEBAD</span>
         </div>
         <p className="site-footer-copyright">
-          © 2026 TuneBad · <a href="/privacy">Privacy</a> · <a href="/copyright">Copyright</a>
+          © 2026 TuneBad · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a> · <a href="/copyright">Copyright</a>
         </p>
       </div>
     </footer>

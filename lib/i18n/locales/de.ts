@@ -310,6 +310,8 @@ const de: Record<keyof typeof en, string> = {
   "footer.copyright": "© 2026 TuneBad",
   "footer.copyrightLink": "Urheberrechtshinweis",
   "footer.privacyLink": "Datenschutzerklärung",
+  "footer.termsLink": "Nutzungsbedingungen",
+  "footer.contactLink": "Kontakt",
   "footer.guides": "Guides",
 
   // Homepage landing / FAQ section
@@ -467,7 +469,7 @@ const de: Record<keyof typeof en, string> = {
   "copyright.s4L2": "Personen, die wiederholt versuchen, urheberrechtlich geschützte Inhalte zu verarbeiten, den Dienst zu verweigern; und",
   "copyright.s4L3": "technische Maßnahmen zu ergreifen, um den Zugang für Nutzer einzuschränken, die gegen diese Bedingungen oder geltendes Recht verstoßen.",
   "copyright.s5H": "5. Urheberrechtsansprüche und Entfernungsanträge",
-  "copyright.s5P1": "TuneBad respektiert die Rechte des geistigen Eigentums von Urhebern. Wenn Sie Inhaber von Urheberrechten (oder ein bevollmächtigter Vertreter) sind und der Ansicht sind, dass der Dienst genutzt wird, um ohne Genehmigung auf Ihr Werk zuzugreifen, können Sie einen Entfernungsantrag an den Betreiber der Website richten. Ein gültiger Antrag sollte das betroffene Werk und das beanstandete Material konkret benennen und einen Nachweis enthalten, dass Sie die entsprechenden Rechte innehaben. TuneBad prüft und beantwortet gültige Anträge zeitnah und wird das benannte Material gegebenenfalls entfernen oder den Zugang dazu sperren.",
+  "copyright.s5P1": "TuneBad respektiert die Rechte des geistigen Eigentums von Urhebern. Wenn Sie Inhaber von Urheberrechten (oder ein bevollmächtigter Vertreter) sind und der Ansicht sind, dass der Dienst genutzt wird, um ohne Genehmigung auf Ihr Werk zuzugreifen, können Sie einen Entfernungsantrag an den Betreiber der Website richten. Ein gültiger Antrag sollte das betroffene Werk und das beanstandete Material konkret benennen und einen Nachweis enthalten, dass Sie die entsprechenden Rechte innehaben. TuneBad prüft und beantwortet gültige Anträge zeitnah und wird das benannte Material gegebenenfalls entfernen oder den Zugang dazu sperren. Senden Sie Meldungen an thetunebad@gmail.com.",
   "copyright.back": "Zurück zu TuneBad",
 
   // File tools (More tools section)

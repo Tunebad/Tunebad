@@ -3024,6 +3024,20 @@ tbody tr:last-child td {
   margin: 36px 0 12px;
 }
 
+/* A second-language block on a bilingual legal page (e.g. /terms #fr): its
+   title is an h2 so the page keeps one h1, styled as a title, and its sections
+   step down to h3 but look like the English h2s. */
+.legal h2.legal-title {
+  /* restated: `.legal h2` above is more specific than `.legal-title` */
+  font-size: clamp(30px, 5vw, 46px);
+  margin-top: 72px;
+}
+
+.legal h3 {
+  font-size: 17px;
+  margin: 36px 0 12px;
+}
+
 .legal p {
   color: var(--ink);
   line-height: 1.7;

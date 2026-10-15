@@ -309,6 +309,8 @@ const ja: Record<keyof typeof en, string> = {
   "footer.copyright": "© 2026 TuneBad",
   "footer.copyrightLink": "著作権に関する免責事項",
   "footer.privacyLink": "プライバシーポリシー",
+  "footer.termsLink": "利用規約",
+  "footer.contactLink": "お問い合わせ",
   "footer.guides": "ガイド",
 
   // Homepage landing / FAQ section
@@ -466,7 +468,7 @@ const ja: Record<keyof typeof en, string> = {
   "copyright.s4L2": "著作権で保護されたコンテンツの処理を繰り返し試みる者へのサービス提供を拒否すること",
   "copyright.s4L3": "本規約または適用法に違反する利用者のアクセスを制限するための技術的措置を講じること",
   "copyright.s5H": "5. 著作権に関する申し立ておよび削除要請",
-  "copyright.s5P1": "TuneBadは、クリエイターの知的財産権を尊重します。お客様が著作権者（またはその正当な代理人）であり、本サービスがお客様の著作物に無断でアクセスするために利用されていると思われる場合は、サイト運営者に削除通知を提出することができます。有効な通知には、対象となる具体的な著作物および問題となる素材を特定し、お客様が該当する権利を保有していることの証明を含める必要があります。TuneBadは有効な通知を速やかに確認して対応し、適切な場合には特定された素材を削除し、またはそのアクセスをブロックします。",
+  "copyright.s5P1": "TuneBadは、クリエイターの知的財産権を尊重します。お客様が著作権者（またはその正当な代理人）であり、本サービスがお客様の著作物に無断でアクセスするために利用されていると思われる場合は、サイト運営者に削除通知を提出することができます。有効な通知には、対象となる具体的な著作物および問題となる素材を特定し、お客様が該当する権利を保有していることの証明を含める必要があります。TuneBadは有効な通知を速やかに確認して対応し、適切な場合には特定された素材を削除し、またはそのアクセスをブロックします。 通知は thetunebad@gmail.com までお送りください。",
   "copyright.back": "TuneBadに戻る",
 
   // File tools (More tools section)

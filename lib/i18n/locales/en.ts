@@ -325,6 +325,8 @@ const en = {
   "footer.copyright": "© 2026 TuneBad",
   "footer.copyrightLink": "Copyright Disclaimer",
   "footer.privacyLink": "Privacy Policy",
+  "footer.termsLink": "Terms of Use",
+  "footer.contactLink": "Contact",
   "footer.guides": "Guides",
 
   // Homepage landing / FAQ section
@@ -506,7 +508,7 @@ const en = {
   "copyright.s4L3": "take technical measures to restrict access for users who violate these terms or applicable law.",
   "copyright.s5H": "5. Copyright claims and takedown requests",
   "copyright.s5P1":
-    "TuneBad respects the intellectual-property rights of creators. If you are a copyright owner (or an authorized agent) and believe the Service is being used to access your work without authorization, you may submit a takedown notice to the site operator. A valid notice should identify the specific work concerned, the material at issue, and include proof that you hold the relevant rights. TuneBad reviews and responds to valid notices promptly, and will remove or block access to the identified material where appropriate.",
+    "TuneBad respects the intellectual-property rights of creators. If you are a copyright owner (or an authorized agent) and believe the Service is being used to access your work without authorization, you may submit a takedown notice to the site operator. A valid notice should identify the specific work concerned, the material at issue, and include proof that you hold the relevant rights. TuneBad reviews and responds to valid notices promptly, and will remove or block access to the identified material where appropriate. Send notices to thetunebad@gmail.com.",
   "copyright.back": "Back to TuneBad",
   // File tools (More tools section)
   "nav.mastering": "Mastering",

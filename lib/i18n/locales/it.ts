@@ -310,6 +310,8 @@ const it: Record<keyof typeof en, string> = {
   "footer.copyright": "© 2026 TuneBad",
   "footer.copyrightLink": "Avviso sul copyright",
   "footer.privacyLink": "Informativa sulla privacy",
+  "footer.termsLink": "Termini di utilizzo",
+  "footer.contactLink": "Contatti",
   "footer.guides": "Guide",
 
   // Homepage landing / FAQ section
@@ -467,7 +469,7 @@ const it: Record<keyof typeof en, string> = {
   "copyright.s4L2": "rifiutare il servizio a chiunque tenti ripetutamente di elaborare contenuti protetti da diritto d'autore; e",
   "copyright.s4L3": "adottare misure tecniche per limitare l'accesso agli utenti che violano i presenti termini o la legge applicabile.",
   "copyright.s5H": "5. Rivendicazioni di diritto d'autore e richieste di rimozione",
-  "copyright.s5P1": "TuneBad rispetta i diritti di proprietà intellettuale dei creatori. Se l'utente è titolare di diritti d'autore (o un agente autorizzato) e ritiene che il Servizio venga utilizzato per accedere a una sua opera senza autorizzazione, può inviare una richiesta di rimozione all'operatore del sito. Una richiesta valida deve identificare l'opera specifica interessata e il materiale in questione, e includere la prova della titolarità dei relativi diritti. TuneBad esamina le richieste valide e vi risponde tempestivamente, e rimuoverà o bloccherà l'accesso al materiale segnalato ove opportuno.",
+  "copyright.s5P1": "TuneBad rispetta i diritti di proprietà intellettuale dei creatori. Se l'utente è titolare di diritti d'autore (o un agente autorizzato) e ritiene che il Servizio venga utilizzato per accedere a una sua opera senza autorizzazione, può inviare una richiesta di rimozione all'operatore del sito. Una richiesta valida deve identificare l'opera specifica interessata e il materiale in questione, e includere la prova della titolarità dei relativi diritti. TuneBad esamina le richieste valide e vi risponde tempestivamente, e rimuoverà o bloccherà l'accesso al materiale segnalato ove opportuno. Invia le segnalazioni a thetunebad@gmail.com.",
   "copyright.back": "Torna a TuneBad",
 
   // File tools (More tools section)
