@@ -1,3 +1,4 @@
+import { checkBotId } from "botid/server";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { validatePlaylistUrl } from "@/lib/media-url";
@@ -15,6 +16,14 @@ const playlistRequestSchema = z.object({
 
 export async function POST(request: NextRequest) {
   if (!isDownloaderEnabled) return new NextResponse("Not found", { status: 404 });
+
+  // Before anything else: an automated client never reaches the bridge. A
+  // real browser on the converter page passes invisibly (see
+  // lib/bot-protection.ts); curl, scripts, and headless scrapers do not.
+  const verification = await checkBotId();
+  if (verification.isBot) {
+    return NextResponse.json({ error: "Automated requests aren't allowed. Use the converter on tunebad.com." }, { status: 403 });
+  }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   if (!allowEnumerate(ip)) {

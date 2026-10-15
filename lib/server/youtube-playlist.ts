@@ -8,7 +8,7 @@
 // to build download URLs, so title/artist splitting is left to each caller.
 import { pickBackend } from "@/lib/server/backends";
 import { enumeratePlaylist } from "@/lib/server/ytdlp";
-import { homeDownloaderUrl, homeDownloaderKey, remoteDownloaderUrl, remoteDownloaderKey } from "@/lib/runtime";
+import { homeDownloaderConfigured, remoteDownloaderUrl, remoteDownloaderKey } from "@/lib/runtime";
 import en from "@/lib/i18n/locales/en";
 
 export interface YouTubeTracklistItem {
@@ -26,7 +26,7 @@ export type YouTubeTracklistResult =
  *  responsible for the isDownloaderEnabled feature-flag gate and for
  *  validating/canonicalizing the URL first. */
 export async function fetchYouTubeTracklist(canonicalPlaylistUrl: string): Promise<YouTubeTracklistResult> {
-  const homeConfigured = Boolean(homeDownloaderUrl && homeDownloaderKey);
+  const homeConfigured = homeDownloaderConfigured;
   const remoteConfigured = Boolean(remoteDownloaderUrl && remoteDownloaderKey);
 
   if (homeConfigured || remoteConfigured) {

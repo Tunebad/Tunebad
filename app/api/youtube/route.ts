@@ -1,9 +1,10 @@
+import { checkBotId } from "botid/server";
 import { NextRequest, NextResponse } from "next/server";
 import { startJobSchema, validateMediaUrl } from "@/lib/server/validate";
 import { allowJobStart } from "@/lib/server/rate-limit";
 import { runningJobCount } from "@/lib/server/jobs";
 import { SetupError, startYouTubeJob } from "@/lib/server/ytdlp";
-import { isDownloaderEnabled, remoteDownloaderUrl, remoteDownloaderKey, homeDownloaderUrl, homeDownloaderKey } from "@/lib/runtime";
+import { isDownloaderEnabled, remoteDownloaderUrl, remoteDownloaderKey, homeDownloaderConfigured } from "@/lib/runtime";
 import { pickBackend } from "@/lib/server/backends";
 import en from "@/lib/i18n/locales/en";
 
@@ -15,6 +16,14 @@ export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   if (!isDownloaderEnabled) return new NextResponse("Not found", { status: 404 });
+
+  // Before anything else: an automated client never reaches the bridge. A
+  // real browser on the converter page passes invisibly (see
+  // lib/bot-protection.ts); curl, scripts, and headless scrapers do not.
+  const verification = await checkBotId();
+  if (verification.isBot) {
+    return NextResponse.json({ error: "Automated requests aren't allowed. Use the converter on tunebad.com." }, { status: 403 });
+  }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   if (!allowJobStart(ip)) {
@@ -55,7 +64,7 @@ export async function POST(request: NextRequest) {
 
   // Never forward unvalidated input — the body reaching a proxy backend is
   // the zod-parsed and canonicalized data, not the raw request body.
-  const homeConfigured = Boolean(homeDownloaderUrl && homeDownloaderKey);
+  const homeConfigured = homeDownloaderConfigured;
   const remoteConfigured = Boolean(remoteDownloaderUrl && remoteDownloaderKey);
 
   if (homeConfigured || remoteConfigured) {

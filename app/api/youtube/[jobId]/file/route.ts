@@ -7,6 +7,7 @@ import { mediaPathForJob } from "@/lib/server/ytdlp";
 import { UUID_PATTERN } from "@/lib/server/validate";
 import { isDownloaderEnabled } from "@/lib/runtime";
 import { backendForJob } from "@/lib/server/backends";
+import { bridgeDownloadToken } from "@/lib/server/download-token";
 
 export const maxDuration = 60;
 
@@ -32,6 +33,21 @@ export async function GET(_request: Request, { params }: { params: Promise<{ job
   const { jobId } = await params;
 
   const proxy = await backendForJob(jobId);
+
+  // Home bridge: send the browser straight to the Mac instead of relaying the
+  // file through this function, so download bytes never touch Vercel's
+  // transfer quotas. The token unlocks only this one job's finished file (see
+  // lib/server/download-token.ts). Works for both the plain download link (a
+  // navigation) and the auto-analyze fetch, which follows the redirect
+  // cross-origin — the bridge answers that with permissive CORS.
+  if (proxy?.backend.tag === "home") {
+    const token = bridgeDownloadToken(proxy.backend.key, proxy.upstreamId);
+    return new Response(null, {
+      status: 302,
+      headers: { Location: `${proxy.backend.base}/dl/${proxy.upstreamId}/${token}`, "Cache-Control": "no-store" },
+    });
+  }
+
   if (proxy) {
     let upstream: Response;
     try {

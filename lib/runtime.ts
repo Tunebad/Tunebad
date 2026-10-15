@@ -22,12 +22,26 @@ export const remoteDownloaderKey = process.env.DOWNLOADER_API_KEY || null;
 export const homeDownloaderUrl = process.env.DOWNLOADER_HOME_URL || null;
 export const homeDownloaderKey = process.env.DOWNLOADER_HOME_KEY || null;
 
+// Whether the home bridge is usable. The KEY is the real requirement: the
+// bridge's URL normally comes from the Edge Config `bridgeUrl` key (the tunnel
+// URL rotates on every cloudflared restart, so it can't live in an env var),
+// with DOWNLOADER_HOME_URL only a static override for local dev.
+//
+// Gating on `homeDownloaderUrl && homeDownloaderKey` instead silently killed
+// the whole downloader after the 2026-07-31 account migration: the rebuilt
+// Vercel project had the key and the Edge Config but no static URL, so every
+// /api/youtube request returned 404 before the bridge was ever tried, for
+// ~2.5 months, while the bridge itself sat healthy.
+export const homeDownloaderConfigured = Boolean(
+  homeDownloaderKey && (homeDownloaderUrl || process.env.EDGE_CONFIG),
+);
+
 // Server-side: gates the /api/youtube/* route handlers. True if the local
 // yt-dlp path is explicitly enabled, OR a remote downloader is configured,
 // OR a home downloader is configured.
 export const isDownloaderEnabled =
   process.env.ENABLE_LINK_DOWNLOADER === "1" ||
   Boolean(remoteDownloaderUrl && remoteDownloaderKey) ||
-  Boolean(homeDownloaderUrl && homeDownloaderKey);
+  homeDownloaderConfigured;
 
 export { downloaderVisible } from "./runtime.client";

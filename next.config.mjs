@@ -1,4 +1,5 @@
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { withBotId } from "botid/next/config";
 
 const isDev = process.env.NODE_ENV !== "production";
 
@@ -25,7 +26,10 @@ const csp = [
   "img-src 'self' data: blob:",
   "media-src 'self' blob:",
   "worker-src 'self' blob:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  // trycloudflare.com: finished downloads now redirect straight to the home
+  // bridge's tunnel (see app/api/youtube/[jobId]/file), and CSP checks every
+  // redirect hop — so the auto-analyze fetch needs the tunnel host allowed.
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.trycloudflare.com",
   "font-src 'self'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -93,4 +97,9 @@ const nextConfig = {
 
 const withBundleAnalyzer = bundleAnalyzer({ enabled: process.env.ANALYZE === "true" });
 
-export default withBundleAnalyzer(nextConfig);
+// withBotId adds the same-origin rewrite BotID's challenge script loads
+// through (so ad-blockers and the CSP's 'self'-only connect-src don't break
+// it) plus a SAMEORIGIN frame header for that one path. It appends its header
+// rule after ours, and Next lets the later rule win for a repeated key, so
+// every other path keeps X-Frame-Options: DENY.
+export default withBotId(withBundleAnalyzer(nextConfig));

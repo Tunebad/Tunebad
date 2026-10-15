@@ -320,6 +320,48 @@ function timingSafeKeyCheck(candidate) {
   return crypto.timingSafeEqual(candidateHash, API_KEY_HASH);
 }
 
+// Direct-download tokens. The website used to stream every finished file
+// bridge -> Vercel function -> browser, which billed each byte twice against
+// Vercel's free transfer quota (MP4s especially). Now the site's file route
+// just 302s the browser here with a token, and the bytes go Mac -> browser.
+//
+// The token is HMAC-SHA256(API_KEY, jobId). Only a holder of the API key
+// (the Vercel function) can mint one, each one unlocks exactly one job's
+// finished file, and it dies with the job when the file is cleaned up — so no
+// separate expiry or token store is needed. Mirrored in
+// lib/server/download-token.ts; the two must stay byte-identical.
+function downloadToken(jobId) {
+  return crypto.createHmac("sha256", API_KEY).update(jobId).digest("hex");
+}
+
+function downloadTokenValid(jobId, candidate) {
+  if (typeof candidate !== "string" || !/^[0-9a-f]{64}$/.test(candidate)) return false;
+  return crypto.timingSafeEqual(Buffer.from(candidate, "hex"), Buffer.from(downloadToken(jobId), "hex"));
+}
+
+async function sendJobFile(res, job, extraHeaders = {}) {
+  if (job.status !== "done") {
+    sendJson(res, 409, { error: "That download isn't finished." });
+    return;
+  }
+  const filePath = mediaPathForJob(job);
+  let stat;
+  try {
+    stat = await fsp.stat(filePath);
+  } catch {
+    sendJson(res, 410, { error: "The file has been cleaned up. Start the download again." });
+    return;
+  }
+  res.writeHead(200, {
+    "Content-Type": CONTENT_TYPE_BY_FORMAT[job.format] || "application/octet-stream",
+    "Content-Length": String(stat.size),
+    "Content-Disposition": contentDisposition(job.title, job.format),
+    "Cache-Control": "no-store",
+    ...extraHeaders,
+  });
+  fs.createReadStream(filePath).pipe(res);
+}
+
 class BodyTooLargeError extends Error {}
 
 function readJsonBody(req, maxBytes = 1024 * 1024) {
@@ -380,6 +422,26 @@ async function handleRequest(req, res) {
 
   if (method === "GET" && pathname === "/health") {
     sendJson(res, 200, { ok: true });
+    return;
+  }
+
+  // Public, token-gated file download (see downloadToken). Sits before the
+  // API-key check on purpose: the browser arrives here via a redirect and
+  // never holds the key. CORS is `*` because a cross-origin redirect makes the
+  // browser send `Origin: null`; the token, not the origin, is the gate, and
+  // no credentials are involved.
+  const dlMatch = pathname.match(/^\/dl\/([^/]+)\/([^/]+)$/);
+  if (method === "GET" && dlMatch) {
+    const [, jobId, token] = dlMatch;
+    const job = UUID_PATTERN.test(jobId) ? jobs.get(jobId) : null;
+    if (!job || !downloadTokenValid(jobId, token)) {
+      sendJson(res, 404, { error: "Download not found. It may have expired." });
+      return;
+    }
+    await sendJobFile(res, job, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Expose-Headers": "Content-Disposition, Content-Length, Content-Type",
+    });
     return;
   }
 
@@ -549,25 +611,7 @@ async function handleRequest(req, res) {
     }
 
     if (sub === "file") {
-      if (job.status !== "done") {
-        sendJson(res, 409, { error: "That download isn't finished." });
-        return;
-      }
-      const filePath = mediaPathForJob(job);
-      let stat;
-      try {
-        stat = await fsp.stat(filePath);
-      } catch {
-        sendJson(res, 410, { error: "The file has been cleaned up. Start the download again." });
-        return;
-      }
-      res.writeHead(200, {
-        "Content-Type": CONTENT_TYPE_BY_FORMAT[job.format] || "application/octet-stream",
-        "Content-Length": String(stat.size),
-        "Content-Disposition": contentDisposition(job.title, job.format),
-        "Cache-Control": "no-store",
-      });
-      fs.createReadStream(filePath).pipe(res);
+      await sendJobFile(res, job);
       return;
     }
 
